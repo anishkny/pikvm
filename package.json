@@ -7,7 +7,7 @@
   "scripts": {
     "build": "tsc",
     "prepublishOnly": "npm run build",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Note: Integration tests require a running PiKVM instance. Run examples to test functionality.\" && exit 0"
   },
   "repository": {
     "type": "git",

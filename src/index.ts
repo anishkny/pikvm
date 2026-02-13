@@ -90,6 +90,24 @@ export interface MSDInfo {
 }
 
 /**
+ * GPIO channel information
+ */
+export interface GPIOChannel {
+  mode: string;
+  state: boolean;
+}
+
+/**
+ * GPIO state information
+ */
+export interface GPIOInfo {
+  enabled: boolean;
+  drivers: Record<string, any>;
+  inputs: Record<string, GPIOChannel>;
+  outputs: Record<string, GPIOChannel>;
+}
+
+/**
  * Main PiKVM client class
  */
 export class PiKVMClient {
@@ -308,8 +326,8 @@ export class PiKVMClient {
   /**
    * Get GPIO state
    */
-  async getGPIO(): Promise<any> {
-    return this.request('GET', '/api/gpio');
+  async getGPIO(): Promise<GPIOInfo> {
+    return this.request<GPIOInfo>('GET', '/api/gpio');
   }
 
   /**
