@@ -18,7 +18,7 @@
     "remote",
     "management"
   ],
-  "author": "",
+  "author": "Anish Karandikar <anishkny@gmail.com>",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/anishkny/pikvm/issues"
