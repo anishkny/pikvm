@@ -2,12 +2,9 @@
   "name": "pikvm",
   "version": "1.0.0",
   "description": "Node.js library for interacting with PiKVM using the HTTP API",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "main": "lib/index.js",
   "scripts": {
-    "build": "tsc",
-    "prepublishOnly": "npm run build",
-    "test": "echo \"Note: Integration tests require a running PiKVM instance. Run examples to test functionality.\" && exit 0"
+    "test": "mocha"
   },
   "repository": {
     "type": "git",
@@ -28,10 +25,11 @@
   },
   "homepage": "https://github.com/anishkny/pikvm#readme",
   "devDependencies": {
-    "@types/node": "^25.2.3",
-    "typescript": "^5.9.3"
+    "chai": "^4.3.10",
+    "mocha": "^10.2.0",
+    "nock": "^13.4.0"
   },
   "files": [
-    "dist"
+    "lib"
   ]
 }

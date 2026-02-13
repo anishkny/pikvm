@@ -1,16 +1,6 @@
-# PiKVM Node.js Library
+# pikvm
 
-A Node.js/TypeScript library for interacting with [PiKVM](https://pikvm.org/) devices using the HTTP API.
-
-## Features
-
-- 🔌 Full TypeScript support with type definitions
-- 🔐 Authentication support (Basic Auth)
-- ⚡ ATX power management (power on/off, reset)
-- 💾 Mass Storage Device (MSD) operations
-- ⌨️ HID (keyboard and mouse) control
-- 🔧 GPIO operations
-- 📊 System information and status
+Node.js library for interacting with PiKVM using the HTTP API.
 
 ## Installation
 
@@ -20,223 +10,95 @@ npm install pikvm
 
 ## Usage
 
-### Basic Setup
-
-```typescript
-import { PiKVMClient } from 'pikvm';
+```javascript
+const { PiKVMClient } = require('pikvm');
 
 const client = new PiKVMClient({
-  host: '192.168.1.100',  // Your PiKVM IP or hostname
-  username: 'admin',       // Your PiKVM username
-  password: 'admin',       // Your PiKVM password
-  secure: true,            // Use HTTPS (default: true)
-  rejectUnauthorized: false, // Accept self-signed certificates
+  host: '192.168.1.100',
+  username: 'admin',
+  password: 'admin',
+  secure: true,
+  rejectUnauthorized: false
 });
-```
 
-### ATX Power Management
-
-```typescript
-// Get current ATX state
-const atxInfo = await client.getATXInfo();
-console.log('Power LED:', atxInfo.leds?.power);
-
-// Power on the system
-await client.powerOn();
-
-// Power off the system (short press)
-await client.powerOff();
-
-// Force power off (long press)
-await client.forcePowerOff();
-
-// Reset the system
-await client.reset();
-```
-
-### System Information
-
-```typescript
 // Get system information
-const info = await client.getInfo();
-console.log('System info:', info);
+client.getInfo().then(info => {
+  console.log('System info:', info);
+});
+
+// ATX power management
+client.powerOn().then(() => console.log('Power on'));
+client.powerOff().then(() => console.log('Power off'));
+client.reset().then(() => console.log('Reset'));
+
+// MSD operations
+client.getMSDInfo().then(info => console.log('MSD info:', info));
+client.setMSDImage('debian.iso', true).then(() => console.log('ISO mounted'));
+client.connectMSD().then(() => console.log('MSD connected'));
+client.disconnectMSD().then(() => console.log('MSD disconnected'));
+
+// HID control
+client.sendKeys(['a', 'b', 'c']);
+client.sendMouseMove(10, 20);
+client.sendMouseButton('left', true);
+
+// GPIO
+client.getGPIO().then(gpio => console.log('GPIO:', gpio));
+client.setGPIO('channel1', true);
 ```
 
-### Mass Storage Device (MSD)
-
-```typescript
-// Get MSD information
-const msdInfo = await client.getMSDInfo();
-console.log('MSD online:', msdInfo.online);
-console.log('Available images:', msdInfo.storage?.images);
-
-// Set and connect an image
-await client.setMSDImage('debian.iso', true); // Mount as CD-ROM
-await client.connectMSD();
-
-// Disconnect MSD
-await client.disconnectMSD();
-
-// Remove an image
-await client.removeMSDImage('debian.iso');
-```
-
-### HID (Keyboard and Mouse) Control
-
-```typescript
-// Send keyboard keys
-await client.sendKeys(['a', 'b', 'c']);
-
-// Send mouse movement
-await client.sendMouseMove(10, 20); // Move 10px right, 20px down
-
-// Click mouse button
-await client.sendMouseButton('left', true);  // Press left button
-await client.sendMouseButton('left', false); // Release left button
-
-// Scroll mouse wheel
-await client.sendMouseWheel(-1); // Scroll up
-```
-
-### GPIO Operations
-
-```typescript
-// Get GPIO state
-const gpio = await client.getGPIO();
-console.log('GPIO state:', gpio);
-
-// Set GPIO channel
-await client.setGPIO('channel1', true);
-
-// Pulse GPIO channel
-await client.pulseGPIO('channel1', 0.5); // 0.5 second pulse
-```
-
-## API Reference
+## API
 
 ### Constructor
 
-```typescript
-new PiKVMClient(config: PiKVMConfig)
+```javascript
+new PiKVMClient(config)
 ```
 
-Configuration options:
-- `host` (string, required): PiKVM hostname or IP address
-- `username` (string, required): Username for authentication
-- `password` (string, required): Password for authentication
-- `port` (number, optional): Port number (default: 443 for HTTPS, 80 for HTTP)
-- `secure` (boolean, optional): Use HTTPS (default: true)
-- `rejectUnauthorized` (boolean, optional): Reject unauthorized SSL certificates (default: false)
+Config options:
+- `host` (required): PiKVM hostname or IP
+- `username` (required): Username
+- `password` (required): Password
+- `port` (optional): Port number (default: 443 for HTTPS, 80 for HTTP)
+- `secure` (optional): Use HTTPS (default: true)
+- `rejectUnauthorized` (optional): Reject unauthorized certificates (default: false)
 
 ### Methods
 
-#### System Information
-- `getInfo(): Promise<SystemInfo>` - Get system information
+**System**
+- `getInfo()` - Get system information
 
-#### ATX Power Management
-- `getATXInfo(): Promise<ATXInfo>` - Get ATX power state information
-- `clickATXButton(button: ATXButton, wait?: boolean): Promise<void>` - Click ATX button
-- `powerOn(): Promise<void>` - Power on the system
-- `powerOff(): Promise<void>` - Power off the system
-- `forcePowerOff(): Promise<void>` - Force power off (long press)
-- `reset(): Promise<void>` - Reset the system
+**ATX Power**
+- `getATXInfo()` - Get ATX status
+- `powerOn()` - Power on
+- `powerOff()` - Power off (short press)
+- `forcePowerOff()` - Force power off (long press)
+- `reset()` - Reset system
 
-#### Mass Storage Device
-- `getMSDInfo(): Promise<MSDInfo>` - Get MSD information
-- `setMSDImage(image: string | null, cdrom?: boolean): Promise<void>` - Set MSD image
-- `connectMSD(): Promise<void>` - Connect MSD
-- `disconnectMSD(): Promise<void>` - Disconnect MSD
-- `removeMSDImage(image: string): Promise<void>` - Remove MSD image
+**MSD**
+- `getMSDInfo()` - Get MSD information
+- `setMSDImage(image, cdrom)` - Set image (cdrom: true for CD-ROM mode)
+- `connectMSD()` - Connect drive
+- `disconnectMSD()` - Disconnect drive
+- `removeMSDImage(image)` - Remove image
 
-#### HID Control
-- `sendKeys(keys: string[]): Promise<void>` - Send keyboard keys
-- `sendMouseMove(x: number, y: number): Promise<void>` - Send mouse movement
-- `sendMouseButton(button: string, state: boolean): Promise<void>` - Send mouse button event
-- `sendMouseWheel(delta: number): Promise<void>` - Send mouse wheel event
+**HID**
+- `sendKeys(keys)` - Send keyboard keys
+- `sendMouseMove(x, y)` - Move mouse
+- `sendMouseButton(button, state)` - Mouse button event
+- `sendMouseWheel(delta)` - Mouse wheel
 
-#### GPIO
-- `getGPIO(): Promise<any>` - Get GPIO state
-- `setGPIO(channel: string, state: boolean): Promise<void>` - Set GPIO channel state
-- `pulseGPIO(channel: string, delay?: number): Promise<void>` - Pulse GPIO channel
+**GPIO**
+- `getGPIO()` - Get GPIO state
+- `setGPIO(channel, state)` - Set GPIO channel
+- `pulseGPIO(channel, delay)` - Pulse GPIO channel
 
-## Examples
+## Testing
 
-### Complete Power Cycle Example
-
-```typescript
-import { PiKVMClient } from 'pikvm';
-
-async function powerCycle() {
-  const client = new PiKVMClient({
-    host: 'pikvm.local',
-    username: 'admin',
-    password: 'admin',
-  });
-
-  console.log('Getting ATX status...');
-  const status = await client.getATXInfo();
-  console.log('Power LED:', status.leds?.power);
-
-  if (status.leds?.power) {
-    console.log('Powering off...');
-    await client.powerOff();
-    
-    // Wait for shutdown
-    await new Promise(resolve => setTimeout(resolve, 10000));
-  }
-
-  console.log('Powering on...');
-  await client.powerOn();
-}
-
-powerCycle().catch(console.error);
+```bash
+npm test
 ```
-
-### Boot from ISO Example
-
-```typescript
-import { PiKVMClient } from 'pikvm';
-
-async function bootFromISO(isoName: string) {
-  const client = new PiKVMClient({
-    host: 'pikvm.local',
-    username: 'admin',
-    password: 'admin',
-  });
-
-  // Set the ISO image as CD-ROM
-  console.log(`Setting image: ${isoName}`);
-  await client.setMSDImage(isoName, true);
-
-  // Connect the MSD
-  console.log('Connecting MSD...');
-  await client.connectMSD();
-
-  // Reset the system to boot from ISO
-  console.log('Resetting system...');
-  await client.reset();
-
-  console.log('System is booting from ISO');
-}
-
-bootFromISO('debian-12.iso').catch(console.error);
-```
-
-## Requirements
-
-- Node.js 12 or higher
-- PiKVM device with HTTP API enabled
 
 ## License
 
 ISC
-
-## Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
-
-## Links
-
-- [PiKVM Official Website](https://pikvm.org/)
-- [PiKVM API Documentation](https://pikvm.github.io/pikvm/api/)
-- [GitHub Repository](https://github.com/anishkny/pikvm)
